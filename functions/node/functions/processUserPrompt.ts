@@ -1,5 +1,4 @@
-import {logger} from "firebase-functions";
-import {OpenAiHelper} from "../utils/openAI.js";
+import {completePrompt} from "../utils/openAI.js";
 
 const readQueryString = (value: unknown): string | null => {
   if (typeof value === "string") {
@@ -12,32 +11,13 @@ const readQueryString = (value: unknown): string | null => {
 };
 
 export const processUserPrompt = async (
-  uid: unknown,
-  listingId: unknown,
+  prompt: unknown,
 ): Promise<string | null> => {
-  const uidValue = readQueryString(uid);
-  const listingIdValue = readQueryString(listingId);
+  const promptValue = readQueryString(prompt);
 
-  if (!uidValue || !listingIdValue) {
+  if (!promptValue) {
     return null;
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    logger.error("OPENAI_API_KEY is not configured");
-    return null;
-  }
-
-  const prompt = [
-    "Generate photo instructions for listing",
-    listingIdValue,
-    "and user",
-    uidValue,
-  ].join(" ");
-
-  const helper = new OpenAiHelper(
-    apiKey,
-    process.env.OPENAI_MODEL ?? "gpt-4o-mini",
-  );
-  return helper.completePrompt(prompt);
+  return completePrompt(promptValue);
 };
